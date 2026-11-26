@@ -1,0 +1,29 @@
+# Descripcion: Lanzador del laboratorio Bastion Seguridad a partir de la imagen publicada
+# en Docker Hub (no requiere el codigo fuente). El modo se controla desde .env.
+# Autor: @naflashdev
+
+services:
+  bastion:
+    image: naflashdev/bastion-lab:${LAB_VERSION:-latest}
+    container_name: bastion-lab
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      # local -> 127.0.0.1 (solo el propio equipo); shared -> 0.0.0.0 (red del aula)
+      - "${BIND_ADDR:-127.0.0.1}:${PORT:-8800}:8080"
+    volumes:
+      - bastion-data:/data
+    # --- Endurecimiento del contenedor ---
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 256
+
+volumes:
+  bastion-data:
